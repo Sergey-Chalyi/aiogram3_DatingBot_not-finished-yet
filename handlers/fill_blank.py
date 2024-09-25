@@ -48,10 +48,9 @@ async def set_interface_lang(message: Message, state: FSMContext):
         await state.set_state(Blank.interface_lang)
         return
 
-    await state.update_data(interface_lang=message.text)
-    print(f"{message.from_user.id}: add status 'interface_lang'")
+    await state.update_data(interface_lang='ua' if message.text == '🇺🇦 Ukrainian' else 'eng')
+    print(f"{message.from_user.id}: add status 'interface_lang' - {'ua' if message.text == '🇺🇦 Ukrainian' else 'eng'}")
     await state.set_state(Blank.gender)
-    print(f"{message.from_user.id}: set status 'gender'")
 
     await message.answer(
         "Choose your gender (male/female):",
@@ -70,10 +69,9 @@ async def set_gender(message: Message, state: FSMContext):
         await state.set_state(Blank.gender)
         return
 
-    await state.update_data(gender=message.text)
-    print(f"{message.from_user.id}: add status 'gender'")
+    await state.update_data(gender='f' if message.text == 'female' else 'm')
+    print(f"{message.from_user.id}: add status 'gender' - {'f' if message.text == 'female' else 'm'}")
     await state.set_state(Blank.name)
-    print(f"{message.from_user.id}: set status 'name'")
 
     await message.answer("Enter your name:", reply_markup=ReplyKeyboardRemove())
 
@@ -90,9 +88,8 @@ async def set_name(message: Message, state: FSMContext):
         return
 
     await state.update_data(name=message.text.capitalize())
-    print(f"{message.from_user.id}: add status 'name'")
+    print(f"{message.from_user.id}: add status 'name' - {message.text.capitalize()}")
     await state.set_state(Blank.age)
-    print(f"{message.from_user.id}: set status 'age'")
 
     await message.answer("Enter your age:", reply_markup=ReplyKeyboardRemove())
 
@@ -117,9 +114,8 @@ async def set_age(message: Message, state: FSMContext):
         return
 
     await state.update_data(age=int(message.text))
-    print(f"{message.from_user.id}: add status 'age'")
+    print(f"{message.from_user.id}: add status 'age' - {int(message.text)}")
     await state.set_state(Blank.country)
-    print(f"{message.from_user.id}: set status 'country'")
 
     await message.answer("Enter your country:", reply_markup=ReplyKeyboardRemove())
 
@@ -136,9 +132,8 @@ async def set_country(message: Message, state: FSMContext):
         return
 
     await state.update_data(country=message.text.capitalize())
-    print(f"{message.from_user.id}: add status 'country'")
+    print(f"{message.from_user.id}: add status 'country' - {message.text.capitalize()}")
     await state.set_state(Blank.city)
-    print(f"{message.from_user.id}: set status 'city'")
 
     await message.answer("Enter your city:", reply_markup=ReplyKeyboardRemove())
 
@@ -154,10 +149,9 @@ async def set_city(message: Message, state: FSMContext):
         await state.set_state(Blank.city)
         return
 
-    await state.update_data(city=message.text)
-    print(f"{message.from_user.id}: add status 'city'")
+    await state.update_data(city=message.text.capitalize())
+    print(f"{message.from_user.id}: add status 'city' - {message.text.capitalize()}")
     await state.set_state(Blank.description)
-    print(f"{message.from_user.id}: set status 'description'")
 
     await message.answer("Enter a description about yourself:", reply_markup=ReplyKeyboardRemove())
 
@@ -174,9 +168,8 @@ async def set_description(message: Message, state: FSMContext):
         return
 
     await state.update_data(description=message.text)
-    print(f"{message.from_user.id}: add status 'description'")
+    print(f"{message.from_user.id}: add status 'description' - {message.text}")
     await state.set_state(Blank.photo)
-    print(f"{message.from_user.id}: set status 'photo'")
 
     await message.answer("Please send your photo:", reply_markup=ReplyKeyboardRemove())
 
@@ -188,13 +181,15 @@ async def set_photo(message: Message, state: FSMContext):
         await state.set_state(Blank.photo)
         return
 
-    photo_id = message.photo[-1].file_id  # Получаем ID самой высокой четкости фото
-    print(f"{message.from_user.id}: add status 'photo'")
-    await state.update_data(photo=photo_id)
+    print(f"{message.from_user.id}: add status 'photo' = {message.photo[-1].file_id}")
+    await state.update_data(photo=message.photo[-1].file_id)
 
     await message.answer("Thank you! Your profile has been created.🎉")
     await message.answer(str(await state.get_data()))
 
+    # save data to db
+    await db_req.add_user_to_public_info(pool, message.from_user.id, **(await state.get_data()))
+    print("DATA added")
     # Завершаем состояние
     # await state.finish()
     # print(f"{message.from_user.id}: State finished.")
@@ -226,6 +221,7 @@ async def bot_start(message: Message, state: FSMContext):
 
     await state.set_state(Blank.interface_lang)
     print(f"{message.from_user.id}: set status 'interface_lang'")
+
 
 
 

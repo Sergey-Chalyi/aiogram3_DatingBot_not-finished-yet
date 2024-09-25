@@ -14,6 +14,17 @@ req_add_user_to_priv_tab = """
     VALUES ((SELECT COALESCE(MAX(id), 0) + 1 FROM user_private_info), $1, $2, $3, $4)
 """
 
+req_add_user_to_public_info = """
+    INSERT INTO user_public_info(
+        id, interface_lang, gender, name, age, country, city, description, photo
+    )
+    VALUES (
+        (SELECT id FROM user_private_info WHERE tg_id = $1), 
+        $2, $3, $4, $5, $6, $7, $8, $9
+    )
+"""
+
+
 
 async def create_pool():
     return await asyncpg.create_pool(
@@ -33,3 +44,9 @@ async def add_user_to_priv_tab(pool: Pool, data: date, tg_id: int, lang_code: st
     async with pool.acquire() as connection:
         await connection.execute(req_add_user_to_priv_tab, *(data, tg_id, lang_code, is_premium))
 
+async def add_user_to_public_info(pool: Pool, tg_id: int, interface_lang: str, gender: str, name: str, age: int, country: str, city: str, description: str, photo: str) -> None:
+    async with pool.acquire() as connection:
+        await connection.execute(
+            req_add_user_to_public_info,
+            tg_id, interface_lang, gender, name, age, country, city, description, photo
+        )
