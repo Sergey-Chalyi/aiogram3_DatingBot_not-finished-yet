@@ -9,9 +9,9 @@ from aiogram.client.default import DefaultBotProperties
 from handlers.fill_blank import router, on_startup
 
 
-load_dotenv()
+load_dotenv(dotenv_path='../config/.env')
 
-bot = Bot(token=os.getenv('TOKEN'), default=DefaultBotProperties(parse_mode='HTML'))
+bot = Bot(token=(os.getenv('TOKEN')), default=DefaultBotProperties(parse_mode='HTML'))
 dp = Dispatcher()
 
 
