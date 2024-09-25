@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Callable
 
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import StatesGroup, State
@@ -67,6 +68,11 @@ async def bot_start(message: Message, state: FSMContext):
 
 @router.message(Blank.interface_lang)
 async def set_interface_lang(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer(f"You have typed not a text!")
+        await state.set_state(Blank.interface_lang)  # Возвращаем состояние
+        return
+
     await state.update_data(interface_lang=message.text)
     print(f"{message.from_user.id}: add status 'interface_lang'")
     await state.set_state(Blank.gender)
@@ -77,6 +83,11 @@ async def set_interface_lang(message: Message, state: FSMContext):
 
 @router.message(Blank.gender)
 async def set_gender(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.gender)  # Возвращаем состояние
+        return
+
     await state.update_data(gender=message.text)
     print(f"{message.from_user.id}: add status 'gender'")
     await state.set_state(Blank.name)
@@ -87,6 +98,11 @@ async def set_gender(message: Message, state: FSMContext):
 
 @router.message(Blank.name)
 async def set_name(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.name)  # Возвращаем состояние
+        return
+
     await state.update_data(name=message.text)
     print(f"{message.from_user.id}: add status 'name'")
     await state.set_state(Blank.age)
@@ -97,6 +113,11 @@ async def set_name(message: Message, state: FSMContext):
 
 @router.message(Blank.age)
 async def set_age(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.age)  # Возвращаем состояние
+        return
+
     await state.update_data(age=message.text)
     print(f"{message.from_user.id}: add status 'age'")
     await state.set_state(Blank.country)
@@ -107,6 +128,11 @@ async def set_age(message: Message, state: FSMContext):
 
 @router.message(Blank.country)
 async def set_country(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.country)  # Возвращаем состояние
+        return
+
     await state.update_data(country=message.text)
     print(f"{message.from_user.id}: add status 'country'")
     await state.set_state(Blank.city)
@@ -117,6 +143,11 @@ async def set_country(message: Message, state: FSMContext):
 
 @router.message(Blank.city)
 async def set_city(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.city)  # Возвращаем состояние
+        return
+
     await state.update_data(city=message.text)
     print(f"{message.from_user.id}: add status 'city'")
     await state.set_state(Blank.description)
@@ -127,6 +158,11 @@ async def set_city(message: Message, state: FSMContext):
 
 @router.message(Blank.description)
 async def set_description(message: Message, state: FSMContext):
+    if message.content_type != 'text':
+        await message.answer("You have typed not a text!")
+        await state.set_state(Blank.description)  # Возвращаем состояние
+        return
+
     await state.update_data(description=message.text)
     print(f"{message.from_user.id}: add status 'description'")
     await state.set_state(Blank.photo)
@@ -137,6 +173,11 @@ async def set_description(message: Message, state: FSMContext):
 
 @router.message(Blank.photo, F.photo)
 async def set_photo(message: Message, state: FSMContext):
+    if not message.photo:  # Проверка на наличие фото
+        await message.answer("Please send your photo:")
+        await state.set_state(Blank.photo)  # Возвращаем состояние
+        return
+
     photo_id = message.photo[-1].file_id  # Получаем ID самой высокой четкости фото
     print(f"{message.from_user.id}: add status 'photo'")
     await state.update_data(photo=photo_id)
@@ -147,6 +188,7 @@ async def set_photo(message: Message, state: FSMContext):
     # Завершаем состояние
     await state.finish()
     print(f"{message.from_user.id}: State finished.")
+
 
 
 
