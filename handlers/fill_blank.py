@@ -145,7 +145,11 @@ async def set_description(message: Message, state: FSMContext):
         await message.answer("You have typed not a text!")
         await state.set_state(Blank.description)
         return
-    if not 20 < len(message.text) < 200:
+    if len(message.text) < 20:
+        await message.answer("Your description is too short!")
+        await state.set_state(Blank.description)
+        return
+    if len(message.text) > 200:
         await message.answer("Your description is too long!")
         await state.set_state(Blank.description)
         return

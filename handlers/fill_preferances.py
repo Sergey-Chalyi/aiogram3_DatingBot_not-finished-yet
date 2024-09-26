@@ -1,13 +1,12 @@
 import re
-from itertools import islice
 
 from aiogram import Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message, ReplyKeyboardRemove
 
 from db import db_req
-from db.db_req import pool
 from handlers.states import Blank
+from keyboards import keyboards
 
 fill_pref_router = Router()
 
@@ -78,7 +77,10 @@ async def set_pref_max_age(message: Message, state: FSMContext):
     print(f"{message.from_user.id}: add status 'pref_min_age' - {int(message.text)}")
     await state.set_state(Blank.pref_country)
 
-    await message.answer("Enter country to searching for:", reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        "Enter country to searching for:",
+        reply_markup=keyboards.kb_choose_pref_country
+    )
 
 @fill_pref_router.message(Blank.pref_country)
 async def set_pref_country(message: Message, state: FSMContext):
@@ -90,11 +92,15 @@ async def set_pref_country(message: Message, state: FSMContext):
         await message.answer("Country's name can't contain numbers!")
         await state.set_state(Blank.pref_country)
         return
-    await state.update_data(pref_country=message.text.capitalize())
+
+    await state.update_data(pref_country=(await state.get_data()).get('country') if message.text == 'my country' else message.text.capitalize())
     print(f"{message.from_user.id}: add status 'pref_country' - {message.text}")
     await state.set_state(Blank.pref_city)
 
-    await message.answer("Enter city to searching for:", reply_markup=ReplyKeyboardRemove())
+    await message.answer(
+        "Enter city to searching for:",
+        reply_markup=keyboards.kb_choose_pref_city
+    )
 
 
 @fill_pref_router.message(Blank.pref_city)
@@ -108,7 +114,7 @@ async def set_pref_city(message: Message, state: FSMContext):
         await state.set_state(Blank.pref_city)
         return
 
-    await state.update_data(pref_city=message.text.capitalize())
+    await state.update_data(pref_city=(await state.get_data()).get('city') if message.text == 'my sity' else message.text.capitalize())
     print(f"{message.from_user.id}: add status 'pref_city' - {message.text}")
 
     keys_to_extract = ['pref_gender', 'pref_min_age', 'pref_max_age', 'pref_country', 'pref_city']
