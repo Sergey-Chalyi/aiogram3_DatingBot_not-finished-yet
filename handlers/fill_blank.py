@@ -2,7 +2,7 @@ from datetime import datetime
 import re
 
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import StatesGroup, State
+from handlers.states import Blank
 
 from db import db_req
 
@@ -15,26 +15,13 @@ from keyboards import keyboards
 router = Router()
 pool = None
 
-
 async def on_startup():
     global pool
     pool = await db_req.create_pool()
 
-
 @router.message(F.from_user.is_bot)
 async def handler_bot_message(message: Message):
     return
-
-
-class Blank(StatesGroup):
-    interface_lang = State()
-    gender = State()
-    name = State()
-    age = State()
-    country = State()
-    city = State()
-    description = State()
-    photo = State()
 
 
 @router.message(Blank.interface_lang)
@@ -184,12 +171,22 @@ async def set_photo(message: Message, state: FSMContext):
     print(f"{message.from_user.id}: add status 'photo' = {message.photo[-1].file_id}")
     await state.update_data(photo=message.photo[-1].file_id)
 
-    await message.answer("Thank you! Your profile has been created.🎉")
-    await message.answer(str(await state.get_data()))
+    await message.answer("Your profile has been created🎉")
 
     # save data to db
-    await db_req.add_user_to_public_info(pool, message.from_user.id, **(await state.get_data()))
+    user_public_data = await state.get_data()
+    await db_req.add_user_to_public_info(pool, message.from_user.id, **(user_public_data))
     print("DATA added")
+
+    await message.answer_photo(
+        photo=user_public_data.get('photo'),
+        caption=f"<b>{user_public_data.get('name')}, {user_public_data.get('age')}, {user_public_data.get('city')}</b>\n{user_public_data.get('description')}",
+        parse_mode='html'
+    )
+
+    await state.set_state(Blank.pref_gender)
+
+
     # Завершаем состояние
     # await state.finish()
     # print(f"{message.from_user.id}: State finished.")

@@ -1,6 +1,7 @@
 import asyncio
 import os
 
+from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import load_dotenv
 
 from aiogram import Bot, Dispatcher
@@ -12,7 +13,7 @@ from handlers.fill_blank import router, on_startup
 load_dotenv(dotenv_path='../config/.env')
 
 bot = Bot(token=(os.getenv('TOKEN')), default=DefaultBotProperties(parse_mode='HTML'))
-dp = Dispatcher()
+dp = Dispatcher(storage = MemoryStorage())
 
 
 async def main():
