@@ -12,8 +12,7 @@ kb_choose_lang = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
-    one_time_keyboard=True,
-    input_field_placeholder="Enter data from keyboard"
+    one_time_keyboard=True
 )
 
 kb_choose_gender = ReplyKeyboardMarkup(
@@ -24,8 +23,7 @@ kb_choose_gender = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
-    one_time_keyboard=True,
-    input_field_placeholder="Enter data from keyboard"
+    one_time_keyboard=True
 )
 
 kb_choose_pref_country = ReplyKeyboardMarkup(
@@ -36,8 +34,7 @@ kb_choose_pref_country = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
-    one_time_keyboard=True,
-    input_field_placeholder="Enter data from keyboard"
+    one_time_keyboard=True
 )
 
 kb_choose_pref_city = ReplyKeyboardMarkup(
@@ -48,7 +45,15 @@ kb_choose_pref_city = ReplyKeyboardMarkup(
         ]
     ],
     resize_keyboard=True,
-    one_time_keyboard=True,
-    input_field_placeholder="Enter data from keyboard"
+    one_time_keyboard=True
 )
 
+kb_choose_publish_or_settings = ReplyKeyboardMarkup(
+    keyboard=[
+        [
+            KeyboardButton(text='Publish and start searching')
+        ]
+    ],
+    resize_keyboard=True,
+    one_time_keyboard=True
+)

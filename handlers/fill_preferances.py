@@ -114,7 +114,7 @@ async def set_pref_city(message: Message, state: FSMContext):
         await state.set_state(Blank.pref_city)
         return
 
-    await state.update_data(pref_city=(await state.get_data()).get('city') if message.text == 'my sity' else message.text.capitalize())
+    await state.update_data(pref_city=(await state.get_data()).get('city') if message.text == 'my city' else message.text.capitalize())
     print(f"{message.from_user.id}: add status 'pref_city' - {message.text}")
 
     keys_to_extract = ['pref_gender', 'pref_min_age', 'pref_max_age', 'pref_country', 'pref_city']
@@ -122,5 +122,13 @@ async def set_pref_city(message: Message, state: FSMContext):
     needed_user_data = {key: user_data[key] for key in keys_to_extract}
 
     await db_req.add_user_to_pref_tab(db_req.pool, message.from_user.id, **needed_user_data)
-    print("pref DATA added")
+    print(f"{message.from_user.id}: pref DATA added")
+
+    await message.answer(
+        "Congratulations! You have finished! Let's publish your blank and start searching?",
+        reply_markup=keyboards.kb_choose_publish_or_settings
+    )
+
+    await state.set_state(Blank.is_active)
+
 

@@ -176,7 +176,7 @@ async def set_photo(message: Message, state: FSMContext):
     # save data to db
     user_data = await state.get_data()
     await db_req.add_user_to_public_tab(db_req.pool, message.from_user.id, **(user_data))
-    print("public DATA added")
+    print(f"{message.from_user.id}: public DATA added")
 
     await message.answer_photo(
         photo=user_data.get('photo'),

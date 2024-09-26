@@ -14,3 +14,4 @@ class Blank(StatesGroup):
     pref_max_age = State()
     pref_country = State()
     pref_city = State()
+    is_active = State()

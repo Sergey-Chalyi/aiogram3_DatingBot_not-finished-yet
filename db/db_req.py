@@ -37,6 +37,14 @@ req_add_user_to_pref_tab = """
     )
 """
 
+req_set_activity = """
+    INSERT INTO user_activity(
+        id, is_active
+    )
+    VALUES (
+        (SELECT id FROM user_private_info WHERE tg_id = $1), $2
+    )
+"""
 
 async def on_startup():
     global pool
@@ -63,13 +71,13 @@ async def add_user_to_priv_tab(pool: Pool, data: date, tg_id: int, lang_code: st
 
 async def add_user_to_public_tab(pool: Pool, tg_id: int, interface_lang: str, gender: str, name: str, age: int, country: str, city: str, description: str, photo: str) -> None:
     async with pool.acquire() as connection:
-        await connection.execute(
-            req_add_user_to_public_tab,
-            tg_id, interface_lang, gender, name, age, country, city, description, photo
-        )
+        await connection.execute(req_add_user_to_public_tab, tg_id, interface_lang, gender, name, age, country, city, description, photo)
 
 async def add_user_to_pref_tab(pool: Pool, tg_id: int, pref_gender: str, pref_min_age: int, pref_max_age: int, pref_country: str, pref_city: str):
     async with pool.acquire() as connection:
-        await connection.execute(
-            req_add_user_to_pref_tab,
-            tg_id, pref_gender, pref_min_age, pref_max_age, pref_country, pref_city)
+        await connection.execute(req_add_user_to_pref_tab, tg_id, pref_gender, pref_min_age, pref_max_age, pref_country, pref_city)
+
+
+async def set_activity(pool: Pool, tg_id: int, is_active: bool):
+    async with pool.acquire() as connection:
+        await connection.execute(req_set_activity, tg_id, is_active)
