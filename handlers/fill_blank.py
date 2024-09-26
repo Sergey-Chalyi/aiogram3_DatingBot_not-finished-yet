@@ -12,19 +12,15 @@ from aiogram.types import Message, ReplyKeyboardRemove
 
 from keyboards import keyboards
 
-router = Router()
-pool = None
+fill_blank_router = Router()
 
-async def on_startup():
-    global pool
-    pool = await db_req.create_pool()
 
-@router.message(F.from_user.is_bot)
+@fill_blank_router.message(F.from_user.is_bot)
 async def handler_bot_message(message: Message):
     return
 
 
-@router.message(Blank.interface_lang)
+@fill_blank_router.message(Blank.interface_lang)
 async def set_interface_lang(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer(f"You have typed not a text!")
@@ -45,7 +41,7 @@ async def set_interface_lang(message: Message, state: FSMContext):
     )
 
 
-@router.message(Blank.gender)
+@fill_blank_router.message(Blank.gender)
 async def set_gender(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -63,7 +59,7 @@ async def set_gender(message: Message, state: FSMContext):
     await message.answer("Enter your name:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.name)
+@fill_blank_router.message(Blank.name)
 async def set_name(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -81,7 +77,7 @@ async def set_name(message: Message, state: FSMContext):
     await message.answer("Enter your age:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.age)
+@fill_blank_router.message(Blank.age)
 async def set_age(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -107,7 +103,7 @@ async def set_age(message: Message, state: FSMContext):
     await message.answer("Enter your country:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.country)
+@fill_blank_router.message(Blank.country)
 async def set_country(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -125,7 +121,7 @@ async def set_country(message: Message, state: FSMContext):
     await message.answer("Enter your city:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.city)
+@fill_blank_router.message(Blank.city)
 async def set_city(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -143,7 +139,7 @@ async def set_city(message: Message, state: FSMContext):
     await message.answer("Enter a description about yourself:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.description)
+@fill_blank_router.message(Blank.description)
 async def set_description(message: Message, state: FSMContext):
     if message.content_type != 'text':
         await message.answer("You have typed not a text!")
@@ -161,7 +157,7 @@ async def set_description(message: Message, state: FSMContext):
     await message.answer("Please send your photo:", reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(Blank.photo)
+@fill_blank_router.message(Blank.photo)
 async def set_photo(message: Message, state: FSMContext):
     if message.content_type != 'photo':
         await message.answer("You have typed not a photo!")
@@ -174,30 +170,26 @@ async def set_photo(message: Message, state: FSMContext):
     await message.answer("Your profile has been created🎉")
 
     # save data to db
-    user_public_data = await state.get_data()
-    await db_req.add_user_to_public_info(pool, message.from_user.id, **(user_public_data))
-    print("DATA added")
+    user_data = await state.get_data()
+    await db_req.add_user_to_public_tab(db_req.pool, message.from_user.id, **(user_data))
+    print("public DATA added")
 
     await message.answer_photo(
-        photo=user_public_data.get('photo'),
-        caption=f"<b>{user_public_data.get('name')}, {user_public_data.get('age')}, {user_public_data.get('city')}</b>\n{user_public_data.get('description')}",
+        photo=user_data.get('photo'),
+        caption=f"<b>{user_data.get('name')}, {user_data.get('age')}, {user_data.get('city')}</b>\n{user_data.get('description')}",
         parse_mode='html'
     )
 
+    await message.answer("Okey, let's fill out your search preferences!", reply_markup=keyboards.kb_choose_gender)
     await state.set_state(Blank.pref_gender)
 
 
-    # Завершаем состояние
-    # await state.finish()
-    # print(f"{message.from_user.id}: State finished.")
-
-
-@router.message(CommandStart())
+@fill_blank_router.message(CommandStart())
 async def bot_start(message: Message, state: FSMContext):
-    if not await db_req.is_user_in_db(pool, message.from_user.id):
+    if not await db_req.is_user_in_db(db_req.pool, message.from_user.id):
         print(f"{message.from_user.id}: isn't in the private db")
         await db_req.add_user_to_priv_tab(
-            pool = pool,
+            pool = db_req.pool,
             data = datetime.now().date(),
             tg_id = message.from_user.id,
             lang_code = message.from_user.language_code,
